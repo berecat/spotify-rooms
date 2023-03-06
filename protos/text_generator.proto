@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+service TextGenerator {
+  // Generate text and return result.
+  rpc Generate(GenerateRequest) returns (GenerateResponse) {}
+  // Generate text and stream intermediate result. The last response should be treated as a completed response.
+  rpc GenerateStreamed(GenerateStreamedRequest) returns (stream GenerateResponse) {}
+}
+
+message GenerateRequest {
+  // Text beginning.
+  string text = 1;
+  // Max length expected in a response.
+  int32 max_length = 2;
+}
+
+message GenerateStreamedRequest {
+  // Text beginning.
+  string text = 1;
+  // Max length expected in a response.
+  int32 max_length = 2;
+  // Minimal amount of milliseconds between intermediate responses.
+  int32 intermediate_result_interval_ms = 3;
+}
+
+message GenerateResponse {
+  // Generated text.
+  string text = 1;
+}
