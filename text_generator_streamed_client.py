@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import logging
 
 import grpc
@@ -13,7 +11,8 @@ def run():
         response = stub.GenerateStreamed(
             GenerateStreamedRequest(text='Here is a story about', max_length=150, intermediate_result_interval_ms=500))
         for r in response:
-            print(r.text)
+            print(r.text_fragment, end="")
+        print()
 
 
 if __name__ == '__main__':

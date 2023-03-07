@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14text_generator.proto\"3\n\x0fGenerateRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x12\n\nmax_length\x18\x02 \x01(\x05\"d\n\x17GenerateStreamedRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x12\n\nmax_length\x18\x02 \x01(\x05\x12\'\n\x1fintermediate_result_interval_ms\x18\x03 \x01(\x05\" \n\x10GenerateResponse\x12\x0c\n\x04text\x18\x01 \x01(\t2\x87\x01\n\rTextGenerator\x12\x31\n\x08Generate\x12\x10.GenerateRequest\x1a\x11.GenerateResponse\"\x00\x12\x43\n\x10GenerateStreamed\x12\x18.GenerateStreamedRequest\x1a\x11.GenerateResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14text_generator.proto\"3\n\x0fGenerateRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x12\n\nmax_length\x18\x02 \x01(\x05\" \n\x10GenerateResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\"d\n\x17GenerateStreamedRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x12\n\nmax_length\x18\x02 \x01(\x05\x12\'\n\x1fintermediate_result_interval_ms\x18\x03 \x01(\x05\"1\n\x18GenerateStreamedResponse\x12\x15\n\rtext_fragment\x18\x01 \x01(\t2\x8f\x01\n\rTextGenerator\x12\x31\n\x08Generate\x12\x10.GenerateRequest\x1a\x11.GenerateResponse\"\x00\x12K\n\x10GenerateStreamed\x12\x18.GenerateStreamedRequest\x1a\x19.GenerateStreamedResponse\"\x00\x30\x01\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'text_generator_pb2', globals())
@@ -22,10 +22,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _GENERATEREQUEST._serialized_start=24
   _GENERATEREQUEST._serialized_end=75
-  _GENERATESTREAMEDREQUEST._serialized_start=77
-  _GENERATESTREAMEDREQUEST._serialized_end=177
-  _GENERATERESPONSE._serialized_start=179
-  _GENERATERESPONSE._serialized_end=211
-  _TEXTGENERATOR._serialized_start=214
-  _TEXTGENERATOR._serialized_end=349
+  _GENERATERESPONSE._serialized_start=77
+  _GENERATERESPONSE._serialized_end=109
+  _GENERATESTREAMEDREQUEST._serialized_start=111
+  _GENERATESTREAMEDREQUEST._serialized_end=211
+  _GENERATESTREAMEDRESPONSE._serialized_start=213
+  _GENERATESTREAMEDRESPONSE._serialized_end=262
+  _TEXTGENERATOR._serialized_start=265
+  _TEXTGENERATOR._serialized_end=408
 # @@protoc_insertion_point(module_scope)

@@ -5,7 +5,7 @@ from time import perf_counter
 from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, Executor
 
-from text_generator_pb2 import GenerateRequest, GenerateStreamedRequest, GenerateResponse
+from text_generator_pb2 import GenerateRequest, GenerateStreamedRequest, GenerateResponse, GenerateStreamedResponse
 from text_generator_pb2_grpc import TextGeneratorServicer, add_TextGeneratorServicer_to_server
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, PreTrainedTokenizer, PreTrainedModel, StoppingCriteriaList
 
@@ -26,7 +26,7 @@ class TextGenerator(TextGeneratorServicer):
         self.__model = model
 
     # Generate text starting with the given text.
-    def __generate_text(self, text: str, max_length: int = None, stopping_criteria: StoppingCriteriaList = None) -> str:
+    def _generate_text(self, text: str, max_length: int = None, stopping_criteria: StoppingCriteriaList = None) -> str:
         global __DEFAULT_MAX_LENGTH
         inputs = self.__tokenizer.encode(text, return_tensors='pt')
         if max_length is None or max_length <= 0:
@@ -38,7 +38,7 @@ class TextGenerator(TextGeneratorServicer):
     # Implementation of the TextGenerator.Generate RPC.
     def Generate(self, request: GenerateRequest, unused_context: grpc.aio.ServicerContext) -> GenerateResponse:
         logging.info("Request: %s", request.text)
-        output_text = self.__generate_text(request.text, max_length=request.max_length)
+        output_text = self._generate_text(request.text, max_length=request.max_length)
         return GenerateResponse(text=output_text)
 
     # Implementation of the TextGenerator.GenerateStreamed RPC.
@@ -55,23 +55,30 @@ class TextGenerator(TextGeneratorServicer):
             start_time = perf_counter()
             intermediate_result_interval_seconds = request.intermediate_result_interval_ms / 1000.0 \
                 if request.intermediate_result_interval_ms > 0 else __DEFAULT_INTERMEDIATE_RESULT_INTERVAL_SECONDS
+            result_text = ""
 
             # A fake stopping criteria. Decodes input_ids and put them to the results queue.
             def custom_stopping_criteria(input_ids, unused_scores) -> bool:
-                nonlocal start_time
+                nonlocal start_time, result_text
                 current_time = perf_counter()
                 # Check that the last intermediate result was sent not longer than intermediate_result_interval_seconds
                 # seconds ago.
                 if (current_time - start_time) >= intermediate_result_interval_seconds:
-                    result_queue.put_nowait(self.__tokenizer.decode(input_ids[0], skip_special_tokens=True))
+                    # Put the intermediate generation result into the current_text
+                    current_text = self.__tokenizer.decode(input_ids[0], skip_special_tokens=True)
+                    # Get the tail of the current_text as a next text fragment.
+                    next_text_fragment = current_text[len(result_text):]
+                    result_text = current_text
+
+                    result_queue.put_nowait(next_text_fragment)
                     start_time = current_time
                 # We don't want to affect any real stopping criteria, so always return False.
                 return False
 
             try:
-                output_text = self.__generate_text(request.text, max_length=request.max_length,
+                current_text = self._generate_text(request.text, max_length=request.max_length,
                                                    stopping_criteria=StoppingCriteriaList([custom_stopping_criteria]))
-                result_queue.put_nowait(output_text)
+                result_queue.put_nowait(current_text[len(result_text):])
             finally:
                 # Put empty result as a token end of stream.
                 result_queue.put_nowait(None)
@@ -81,7 +88,7 @@ class TextGenerator(TextGeneratorServicer):
 
         r = result_queue.get()
         while r is not None:
-            yield GenerateResponse(text=r)
+            yield GenerateStreamedResponse(text_fragment=r)
             r = result_queue.get()
 
         # Read result to handle any possible thrown exceptions.
@@ -100,12 +107,11 @@ if __name__ == "__main__":
 
     text_generator = TextGenerator(ThreadPoolExecutor(max_workers=20), tokenizer, model)
 
-    with grpc.server(ThreadPoolExecutor(max_workers=20)) as server:
-        # server = grpc.server(ThreadPoolExecutor(max_workers=20))
-        add_TextGeneratorServicer_to_server(text_generator, server)
+    server = grpc.server(ThreadPoolExecutor(max_workers=20))
+    add_TextGeneratorServicer_to_server(text_generator, server)
 
-        listen_address = "[::]:50052"
-        server.add_insecure_port(listen_address)
-        logging.info("Starting server on %s", listen_address)
-        server.start()
-        server.wait_for_termination()
+    listen_address = "[::]:50052"
+    server.add_insecure_port(listen_address)
+    logging.info("Starting server on %s", listen_address)
+    server.start()
+    server.wait_for_termination()

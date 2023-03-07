@@ -10,7 +10,7 @@ The sample `TextGenerator` GRPC service provides two methods.
 ```protobuf
 service TextGenerator {
   rpc Generate(GenerateRequest) returns (GenerateResponse) {}
-  rpc GenerateStreamed(GenerateStreamedRequest) returns (stream GenerateResponse) {}
+  rpc GenerateStreamed(GenerateStreamedRequest) returns (stream GenerateStreamedResponse) {}
 }
 ```
 
@@ -25,19 +25,34 @@ message GenerateRequest {
 }
 ```
 
-`GenerateStreamed` RPC performs the same work but streaming intermediate results during the generation process. The last
-`GenerateResponse` message in the response stream is assumed as a final result. Optional
-`GenerateStreamedRequest.intermediate_result_interval_ms` field specifies a minimal time span between intermediate
-results.
-For instance, if the time interval is set to 500ms and a total generation process would take longer than this value,
-every
-500 ms an intermediate result returned.
+Result contains the only field `GenerateResponse.text` holding the product of generation process.
+
+```protobuf
+message GenerateResponse {
+  string text = 1;
+}
+```
+
+`GenerateStreamed` RPC performs the same work but streaming intermediate results during the generation process.
+Optional `GenerateStreamedRequest.intermediate_result_interval_ms` field specifies a minimal time span between intermediate
+results. For instance, if the time interval is set to 500ms and a total generation process would take longer than this value,
+every 500 ms an intermediate result returned.
 
 ```protobuf
 message GenerateStreamedRequest {
   string text = 1;
   int32 max_length = 2;
   int32 intermediate_result_interval_ms = 3;
+}
+```
+
+Each message in the response stream contains the only field `GenerateStreamedResponse.text_fragment` with a value of
+next portion of the generated text. The final value could be calculated as a concatenation of all text fragments in the
+same order there were received.
+
+```protobuf
+message GenerateStreamedResponse {
+  string text_fragment = 1;
 }
 ```
 

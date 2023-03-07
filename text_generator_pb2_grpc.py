@@ -22,7 +22,7 @@ class TextGeneratorStub(object):
         self.GenerateStreamed = channel.unary_stream(
                 '/TextGenerator/GenerateStreamed',
                 request_serializer=text__generator__pb2.GenerateStreamedRequest.SerializeToString,
-                response_deserializer=text__generator__pb2.GenerateResponse.FromString,
+                response_deserializer=text__generator__pb2.GenerateStreamedResponse.FromString,
                 )
 
 
@@ -30,13 +30,15 @@ class TextGeneratorServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Generate(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Generate text and return result.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GenerateStreamed(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Generate text and stream intermediate result. The last response should be treated as a completed response.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -52,7 +54,7 @@ def add_TextGeneratorServicer_to_server(servicer, server):
             'GenerateStreamed': grpc.unary_stream_rpc_method_handler(
                     servicer.GenerateStreamed,
                     request_deserializer=text__generator__pb2.GenerateStreamedRequest.FromString,
-                    response_serializer=text__generator__pb2.GenerateResponse.SerializeToString,
+                    response_serializer=text__generator__pb2.GenerateStreamedResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -94,6 +96,6 @@ class TextGenerator(object):
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/TextGenerator/GenerateStreamed',
             text__generator__pb2.GenerateStreamedRequest.SerializeToString,
-            text__generator__pb2.GenerateResponse.FromString,
+            text__generator__pb2.GenerateStreamedResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -27,3 +27,9 @@ class GenerateStreamedRequest(_message.Message):
     max_length: int
     text: str
     def __init__(self, text: _Optional[str] = ..., max_length: _Optional[int] = ..., intermediate_result_interval_ms: _Optional[int] = ...) -> None: ...
+
+class GenerateStreamedResponse(_message.Message):
+    __slots__ = ["text_fragment"]
+    TEXT_FRAGMENT_FIELD_NUMBER: _ClassVar[int]
+    text_fragment: str
+    def __init__(self, text_fragment: _Optional[str] = ...) -> None: ...
