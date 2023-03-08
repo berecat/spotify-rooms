@@ -43,7 +43,7 @@ class TextGenerator(TextGeneratorServicer):
 
     # Implementation of the TextGenerator.GenerateStreamed RPC.
     def GenerateStreamed(self, request: GenerateStreamedRequest,
-                         unused_context: grpc.aio.ServicerContext) -> GenerateResponse:
+                         unused_context: grpc.aio.ServicerContext) -> GenerateStreamedResponse:
         global __DEFAULT_INTERMEDIATE_RESULT_INTERVAL_SECONDS
 
         logging.info("Request for a stream: %s", request.text)
