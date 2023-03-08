@@ -122,7 +122,7 @@ installed.
 Please refer to the official installation instruction, but in general case the following `pip` command could be used:
 
 ```shell
-pip install grpc grpc-tools torch transformers
+pip install grpcio grpcio-tools torch transformers
 ```
 
 ### Starting the Server
